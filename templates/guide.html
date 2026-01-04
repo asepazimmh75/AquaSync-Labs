@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guide - AquaSync</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Poppins', sans-serif; } </style>
+</head>
+<body class="bg-gray-100 h-screen flex overflow-hidden">
+
+    <aside class="w-64 bg-[#0F172A] text-white flex flex-col hidden md:flex">
+        <div class="p-6 flex items-center gap-3">
+            <div class="bg-blue-500 p-1.5 rounded-lg"><i class="fa-solid fa-droplet text-white"></i></div>
+            <h1 class="text-xl font-bold">AquaSync</h1>
+        </div>
+        <nav class="flex-1 px-4 space-y-2 mt-4">
+            <a href="/dashboard" class="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-white/5 px-4 py-3 rounded-xl transition">
+                <i class="fa-solid fa-grid-2"></i> Dashboard
+            </a>
+            <a href="/settings" class="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-white/5 px-4 py-3 rounded-xl transition">
+                <i class="fa-solid fa-gear"></i> Settings
+            </a>
+            <a href="/guide" class="flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-xl shadow-lg transition">
+                <i class="fa-solid fa-book-open"></i> Guide
+            </a>
+        </nav>
+        <div class="p-4">
+            <a href="/logout" class="flex items-center gap-3 text-gray-400 hover:text-red-400 px-4 py-3 transition"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </div>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto p-8">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">User Guide 📖</h1>
+            <p class="text-gray-500">Panduan memahami parameter dan fitur AquaSync.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex gap-4">
+                <div class="bg-blue-100 text-blue-600 w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i class="fa-solid fa-temperature-half text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-800 text-lg">Water Temperature</h3>
+                    <p class="text-gray-600 text-sm mt-1 leading-relaxed">
+                        Menampilkan suhu air akuarium secara <i>real-time</i> dalam satuan Celcius (°C). Pastikan suhu berada di rentang optimal (24°C - 28°C) untuk kesehatan ikan.
+                    </p>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex gap-4">
+                <div class="bg-blue-100 text-blue-600 w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i class="fa-solid fa-fish text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-800 text-lg">Amount of Feed</h3>
+                    <p class="text-gray-600 text-sm mt-1 leading-relaxed">
+                        Estimasi sisa pakan yang tersedia di wadah penyimpanan (Hopper). Satuan dalam gram. Sistem akan memberi peringatan jika pakan hampir habis.
+                    </p>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex gap-4">
+                <div class="bg-blue-100 text-blue-600 w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i class="fa-solid fa-droplet text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-800 text-lg">Water Level</h3>
+                    <p class="text-gray-600 text-sm mt-1 leading-relaxed">
+                        Indikator ketinggian air dalam akuarium. 100% berarti penuh. Berguna untuk mendeteksi kebocoran atau penguapan air yang berlebihan.
+                    </p>
+                </div>
+            </div>
+
+             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex gap-4">
+                <div class="bg-blue-100 text-blue-600 w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i class="fa-solid fa-heart-pulse text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-800 text-lg">System Health</h3>
+                    <p class="text-gray-600 text-sm mt-1 leading-relaxed">
+                        Skor kesehatan keseluruhan sistem IoT. Dihitung berdasarkan konektivitas sensor (ESP32) dan kestabilan data yang dikirimkan.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+        
+        <div class="mt-8 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-2xl p-6 text-white shadow-lg">
+            <h3 class="font-bold text-xl mb-2"><i class="fa-regular fa-lightbulb mr-2"></i>Tips Perawatan</h3>
+            <ul class="list-disc list-inside space-y-1 text-sm opacity-90">
+                <li>Bersihkan sensor suhu setiap 2 minggu sekali agar pembacaan akurat.</li>
+                <li>Pastikan pakan yang digunakan berbentuk pelet kering agar tidak menyumbat motor servo.</li>
+                <li>Cek koneksi Wi-Fi ESP32 jika status Device berubah menjadi "Offline".</li>
+            </ul>
+        </div>
+
+    </main>
+</body>
+</html>

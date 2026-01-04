@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AquaSync</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen flex overflow-hidden">
+
+    <aside class="w-64 bg-[#0F172A] text-white flex flex-col hidden md:flex">
+        <div class="p-6 flex items-center gap-3">
+            <div class="bg-blue-500 p-1.5 rounded-lg">
+                <i class="fa-solid fa-droplet text-white"></i>
+            </div>
+            <h1 class="text-xl font-bold">AquaSync</h1>
+        </div>
+
+        <nav class="flex-1 px-4 space-y-2 mt-4">
+            <a href="/dashboard" class="flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-xl shadow-lg shadow-blue-900/50 transition">
+                <i class="fa-solid fa-grid-2"></i> Dashboard
+            </a>
+            <a href="/settings" class="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-white/5 px-4 py-3 rounded-xl transition">
+                <i class="fa-solid fa-gear"></i> Settings
+            </a>
+            <a href="/guide" class="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-white/5 px-4 py-3 rounded-xl transition">
+                <i class="fa-solid fa-book-open"></i> Guide
+            </a>
+        </nav>
+
+        <div class="p-4">
+            <a href="/logout" class="flex items-center gap-3 text-gray-400 hover:text-red-400 px-4 py-3 transition">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </a>
+        </div>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto p-8">
+        
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">Welcome back, {{ user.username }}! 👋</h1>
+                <p class="text-gray-500 mt-1">Here's what's happening with your aquarium today.</p>
+            </div>
+            <button class="md:hidden text-gray-600"><i class="fa-solid fa-bars text-2xl"></i></button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm">Water Temperature</p>
+                        <h2 class="text-3xl font-bold text-gray-800 mt-2">{{ data.temp }} <span class="text-lg text-gray-400">°C</span></h2>
+                        <p class="text-xs text-gray-400 mt-2">Optimal range</p>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded-xl text-blue-500">
+                        <i class="fa-solid fa-temperature-half text-xl"></i>
+                    </div>
+                </div>
+                <div class="absolute top-4 right-4 w-2 h-2 bg-green-400 rounded-full"></div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm">Amount of Feed</p>
+                        <h2 class="text-3xl font-bold text-gray-800 mt-2">{{ data.feed }} <span class="text-lg text-gray-400">g</span></h2>
+                        <p class="text-xs text-red-500 mt-2 font-medium">↓ {{ data.feed_trend }}g from yesterday</p>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded-xl text-blue-500">
+                        <i class="fa-solid fa-fish text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm">Water Level</p>
+                        <h2 class="text-3xl font-bold text-gray-800 mt-2">{{ data.water_level }} <span class="text-lg text-gray-400">%</span></h2>
+                        <p class="text-xs text-green-500 mt-2 font-medium">↑ +5% from yesterday</p>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded-xl text-blue-500">
+                        <i class="fa-solid fa-droplet text-xl"></i>
+                    </div>
+                </div>
+                <div class="absolute top-4 right-4 w-2 h-2 bg-green-400 rounded-full"></div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm">System Health</p>
+                        <h2 class="text-3xl font-bold text-gray-800 mt-2">{{ data.system_health }} <span class="text-lg text-gray-400">%</span></h2>
+                        <p class="text-xs text-green-500 mt-2 font-medium">↑ All systems normal</p>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded-xl text-blue-500">
+                        <i class="fa-solid fa-heart-pulse text-xl"></i>
+                    </div>
+                </div>
+                <div class="absolute top-4 right-4 w-2 h-2 bg-green-400 rounded-full"></div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <h3 class="font-bold text-gray-800">Feeding Trends</h3>
+                <p class="text-sm text-gray-500 mb-4">Feed dispensed over the last 24 hours</p>
+                <div class="h-64">
+                    <canvas id="feedingChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-fit">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-bold text-gray-800">Device Status</h3>
+                    <span class="bg-green-100 text-green-600 text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
+                        <i class="fa-solid fa-wifi"></i> Online
+                    </span>
+                </div>
+
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                        <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-gray-800">AquaSync-001</h4>
+                        <p class="text-sm text-gray-500">ESP32 Controller</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 text-sm text-gray-500 mb-6 border-b pb-6">
+                    <i class="fa-regular fa-clock"></i> Last seen: Just now
+                </div>
+
+                <div class="flex justify-between">
+                    <div>
+                        <p class="text-xs text-gray-500">Firmware</p>
+                        <p class="font-bold text-gray-800">v1.2.0</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs text-gray-500">Signal</p>
+                        <p class="font-bold text-gray-800">-42 dBm</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <script>
+        const ctx = document.getElementById('feedingChart').getContext('2d');
+        
+        // Membuat gradasi warna biru seperti di screenshot
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(59, 130, 246, 0.5)'); // Blue 500
+        gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
+                datasets: [{
+                    label: 'Feed (g)',
+                    data: [1.8, 0.2, 2.5, 2.7, 3.6, 1.8, 0.5], // Data dummy melengkung
+                    borderColor: '#3B82F6', // Tailwind Blue 500
+                    backgroundColor: gradient,
+                    borderWidth: 2,
+                    tension: 0.4, // Membuat garis melengkung halus (spline)
+                    fill: true,
+                    pointRadius: 0, // Menyembunyikan titik
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false } // Sembunyikan legenda
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { borderDash: [5, 5] }, // Garis putus-putus
+                    },
+                    x: {
+                        grid: { display: false } // Hilangkan grid vertikal
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
