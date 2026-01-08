@@ -24,26 +24,31 @@
         <h2 class="text-center text-2xl font-bold text-gray-800 mb-1">Welcome Back</h2>
         <p class="text-center text-gray-500 text-sm mb-8">Sign in to access your AquaSync dashboard</p>
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-      <div class="mb-4 p-3 rounded-lg text-sm {{ 'bg-red-100 text-red-700' if category == 'error' else 'bg-green-100 text-green-700' }}">
-        {{ message }}
-      </div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
+        <div id="flash-message">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="mb-4 p-3 rounded-lg text-sm {{ 'bg-red-100 text-red-700' if category == 'error' else 'bg-green-100 text-green-700' }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+            {% endwith %}
+        </div>
 
-        <form action="/" method="POST">
+        <div id="flash-message"></div>
+
+
+        <form action="/" method="POST" id="loginForm">
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2 ml-1">Email</label>
                 <div class="relative">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
                         <i class="fa-regular fa-user"></i>
                     </span>
-                    <input type="email" name="email" value="" 
+                    <input type="email" name="email" id="email" required
                         class="w-full bg-blue-50 text-gray-700 pl-10 pr-3 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition" 
-                        placeholder="Enter your email">
+                        placeholder="Email Address">
                 </div>
             </div>
 
@@ -56,12 +61,33 @@
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
                         <i class="fa-solid fa-lock"></i>
                     </span>
-                    <input type="password" name="password" id="password" value=""
+                    <input type="password" name="password" id="password" required
                         class="w-full bg-blue-50 text-gray-700 pl-10 pr-10 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition" 
-                        placeholder="Enter your password">
+                        placeholder="Password">
                     <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 cursor-pointer hover:text-gray-600" onclick="togglePassword()">
                         <i class="fa-regular fa-eye" id="eyeIcon"></i>
                     </span>
+                </div>
+            </div>
+
+            <div class="mb-2 mt-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2 ml-1">Enter OTP</label>
+                
+                <div class="flex gap-2">
+                    <div class="relative flex-grow">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </span>
+                        
+                        <input type="text" name="otp_code" id="otp_code" maxlength="6" autocomplete="off"
+                            class="w-full bg-blue-50 text-gray-700 pl-10 pr-10 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition" 
+                            placeholder="Enter OTP">
+                    </div>
+
+                    <button type="button" onclick="requestOtp()" id="btnGetCode"
+                        class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 px-4 rounded-lg transition whitespace-nowrap min-w-[100px]">
+                        Get Code
+                    </button>
                 </div>
             </div>
 
@@ -76,6 +102,7 @@
     </div>
 
     <script>
+        // 1. Toggle Password Utama (Tetap Ada)
         function togglePassword() {
             const passwordInput = document.getElementById('password');
             const eyeIcon = document.getElementById('eyeIcon');
@@ -87,6 +114,48 @@
                 passwordInput.type = 'password';
                 eyeIcon.classList.remove('fa-eye-slash');
                 eyeIcon.classList.add('fa-eye');
+            }
+        }
+
+        // 2. AJAX Request OTP
+        async function requestOtp() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('btnGetCode');
+            const flashDiv = document.getElementById('flash-message');
+
+            if (!email || !password) {
+                flashDiv.innerHTML = `<div class="mb-4 p-3 rounded-lg text-sm bg-red-100 text-red-700">Harap isi Email dan Password dulu!</div>`;
+                return;
+            }
+
+            const originalText = btn.innerText;
+            btn.innerText = "Sending...";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/ajax-send-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, password: password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    btn.innerText = "Sent!";
+                    btn.classList.remove("bg-gray-200", "text-gray-700");
+                    btn.classList.add("bg-green-100", "text-green-700");
+                    flashDiv.innerHTML = `<div class="mb-4 p-3 rounded-lg text-sm bg-green-100 text-green-700">${data.message}</div>`;
+                } else {
+                    btn.innerText = "Retry";
+                    btn.disabled = false;
+                    flashDiv.innerHTML = `<div class="mb-4 p-3 rounded-lg text-sm bg-red-100 text-red-700">${data.message}</div>`;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                btn.innerText = "Error";
+                btn.disabled = false;
             }
         }
     </script>

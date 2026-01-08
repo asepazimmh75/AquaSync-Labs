@@ -1,11 +1,13 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.message import EmailMessage
 from dotenv import load_dotenv
+import random
 import secrets
 import smtplib
 import os
@@ -72,6 +74,11 @@ class User(UserMixin, db.Model):
     verification_token = db.Column(db.String(100), unique=True, nullable=True) # Token unik
     token_expiry = db.Column(db.DateTime, nullable=True) # Batas waktu token
 
+        # 🔐 OTP LOGIN
+    otp_hash = db.Column(db.String(255), nullable=True)
+    otp_expiry = db.Column(db.DateTime, nullable=True)
+    otp_verified = db.Column(db.Boolean, default=False)
+
 # --- MODEL BARU: SCHEDULE (Jadwal Pakan) ---
 class Schedule(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -92,6 +99,61 @@ def load_user(user_id):
 # (Copy paste route login/register yang sebelumnya di sini, saya skip biar tidak kepanjangan)
 # ...
 
+# ===== HELPER FUNCTION (DI ATAS) =====
+def generate_otp():
+    return str(random.randint(100000, 999999))
+
+def send_otp_email(to_email, otp_code):
+    sender_email = os.getenv("GMAIL_EMAIL")
+    sender_password = os.getenv("GMAIL_APP_PASSWORD")
+
+    if not sender_email or not sender_password:
+        print("ENV GMAIL belum ter-load")
+        return False
+
+    msg = EmailMessage()
+    msg['From'] = f"AquaSync Lab <{sender_email}>"
+    msg['To'] = to_email
+    msg['Subject'] = "Kode OTP Login AquaSync Lab"
+    msg.set_content(f"Kode OTP kamu: {otp_code}\nBerlaku 5 menit.")
+
+    try:
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            server.login(sender_email, sender_password)
+            server.send_message(msg)
+        return True
+    except Exception as e:
+        print("Gagal kirim email:", e)
+        return False
+
+
+# --- ROUTE AJAX: KIRIM OTP TANPA RELOAD ---
+@app.route('/ajax-send-otp', methods=['POST'])
+def ajax_send_otp():
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+
+    user = User.query.filter_by(email=email).first()
+
+    # 1. Validasi Email & Password dulu
+    if not user or not check_password_hash(user.password, password):
+        return jsonify({'status': 'error', 'message': 'Email atau Password salah!'}), 401
+
+    # 2. Generate & Simpan OTP
+    otp_code = generate_otp()
+    user.otp_hash = generate_password_hash(otp_code)
+    user.otp_expiry = datetime.now() + timedelta(minutes=5)
+    user.otp_verified = False
+    db.session.commit()
+
+    # 3. Kirim Email
+    if send_otp_email(user.email, otp_code):
+        return jsonify({'status': 'success', 'message': 'Kode OTP terkirim ke email!'})
+    else:
+        return jsonify({'status': 'error', 'message': 'Gagal mengirim email.'}), 500
+
+# --- ROUTE LOGIN UTAMA (Update) ---
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -100,20 +162,35 @@ def login():
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
+        otp_input = request.form.get('otp_code') # Ambil input OTP
 
         user = User.query.filter_by(email=email).first()
 
+        # Cek Kredensial Dasar
         if user and check_password_hash(user.password, password):
-
-            # --- CEK STATUS VERIFIKASI EMAIL ---
-            if not user.is_verified:
-                flash('Akun belum diverifikasi. Cek inbox email Anda.', 'warning')
+            
+            # --- LOGIKA CEK OTP ---
+            # Pastikan user memasukkan OTP
+            if not otp_input:
+                flash('Silakan minta dan masukkan kode OTP terlebih dahulu.', 'warning')
                 return render_template('login.html')
-            # ----------------------------------
 
-            login_user(user)
-            return redirect(url_for('dashboard'))
+            # Cek Expiry
+            if not user.otp_expiry or datetime.now() > user.otp_expiry:
+                flash('Kode OTP kadaluarsa. Silakan minta ulang.', 'error')
+                return render_template('login.html')
 
+            # Cek Kecocokan Hash OTP
+            if user.otp_hash and check_password_hash(user.otp_hash, otp_input):
+                # SUKSES LOGIN
+                user.otp_verified = True
+                user.otp_hash = None # Reset OTP
+                db.session.commit()
+                
+                login_user(user)
+                return redirect(url_for('dashboard'))
+            else:
+                flash('Kode OTP salah!', 'error')
         else:
             flash('Email atau password salah!', 'error')
 
@@ -167,7 +244,7 @@ def register():
         else:
             flash('Registrasi berhasil, tapi email verifikasi gagal dikirim.', 'warning')
 
-        return redirect(url_for('login'))
+        return redirect(url_for('register'))
 
     return render_template('register.html')
 
