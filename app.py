@@ -311,6 +311,111 @@ def settings():
     schedules = Schedule.query.filter_by(user_id=current_user.id).order_by(Schedule.time).all()
     return render_template('settings.html', user=current_user, schedules=schedules, page='settings')
 
+
+# --- 1. HALAMAN REQUEST RESET PASSWORD ---
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    # Jika sudah login, redirect ke dashboard
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+
+    if request.method == 'POST':
+        email = request.form.get('email')
+        user = User.query.filter_by(email=email).first()
+
+        if user:
+            # Generate OTP & Expiry
+            otp_code = generate_otp()
+            expiry_time = datetime.now() + timedelta(minutes=5)
+
+            # Simpan ke Database (Sesuai nama kolom yang diminta)
+            user.otp_hash = generate_password_hash(otp_code)
+            user.otp_expiry = expiry_time
+            db.session.commit()
+
+            # Kirim Email
+            if send_otp_email(user.email, otp_code):
+                # Simpan email di session untuk step selanjutnya
+                session['reset_email'] = email
+                flash('Kode OTP telah dikirim ke email Anda.', 'info')
+                return redirect(url_for('verify_reset_otp'))
+            else:
+                flash('Gagal mengirim email. Coba lagi nanti.', 'error')
+        else:
+            # Demi keamanan, pesan tetap generik atau spesifik sesuai kebutuhan
+            flash('Email tidak ditemukan dalam sistem.', 'error')
+
+    return render_template('forgot_password.html')
+
+
+# --- 2. HALAMAN VERIFIKASI OTP ---
+@app.route('/reset-verify', methods=['GET', 'POST'])
+def verify_reset_otp():
+    # Cek apakah user punya akses (harus lewat step 1)
+    if 'reset_email' not in session:
+        return redirect(url_for('forgot_password'))
+
+    email = session['reset_email']
+    user = User.query.filter_by(email=email).first()
+
+    if request.method == 'POST':
+        otp_input = request.form.get('otp_code')
+
+        # Validasi User & Expiry
+        if not user or not user.otp_expiry or datetime.now() > user.otp_expiry:
+            flash('Kode OTP sudah kadaluarsa. Silakan minta ulang.', 'error')
+            return redirect(url_for('forgot_password'))
+
+        # Validasi Kecocokan OTP
+        if check_password_hash(user.otp_hash, otp_input):
+            # SUKSES: Tandai user sudah lolos verifikasi di session
+            session['is_reset_verified'] = True
+            return redirect(url_for('update_password'))
+        else:
+            flash('Kode OTP salah!', 'error')
+
+    # Kirim variabel email ke template untuk ditampilkan (readonly)
+    return render_template('verify_reset_otp.html', email=email)
+
+
+# --- 3. HALAMAN UPDATE PASSWORD ---
+@app.route('/reset-update', methods=['GET', 'POST'])
+def update_password():
+    # Security Check: Harus punya email di session DAN sudah lolos verifikasi OTP
+    if 'reset_email' not in session or 'is_reset_verified' not in session:
+        return redirect(url_for('forgot_password'))
+
+    email = session['reset_email']
+    
+    if request.method == 'POST':
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+
+        if new_password != confirm_password:
+            flash('Konfirmasi password tidak cocok.', 'error')
+        elif len(new_password) < 6: # Opsional: validasi panjang password
+            flash('Password minimal 6 karakter.', 'error')
+        else:
+            # Update Database
+            user = User.query.filter_by(email=email).first()
+            if user:
+                user.password = generate_password_hash(new_password, method='scrypt')
+                
+                # Reset kolom OTP agar tidak bisa dipakai ulang
+                user.otp_hash = None
+                user.otp_expiry = None
+                db.session.commit()
+
+                # Bersihkan session
+                session.pop('reset_email', None)
+                session.pop('is_reset_verified', None)
+
+                flash('Password berhasil diubah! Silakan login.', 'success')
+                return redirect(url_for('login'))
+
+    return render_template('update_password.html', email=email)
+
+
 @app.route('/delete_schedule/<int:id>')
 @login_required
 def delete_schedule(id):
@@ -325,6 +430,7 @@ def delete_schedule(id):
 @login_required
 def guide():
     return render_template('guide.html', user=current_user, page='guide')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
