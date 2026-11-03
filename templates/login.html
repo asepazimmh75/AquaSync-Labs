@@ -4,40 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AquaSync - Sign In</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Poppins', sans-serif; }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
 </head>
 <body class="bg-gray-50 h-screen flex items-center justify-center">
 
     <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
         <div class="flex justify-center items-center mb-6">
-            <div class="bg-blue-500 text-white p-2 rounded-lg mr-2">
-                <i class="fa-solid fa-droplet text-xl"></i>
+            <div class="flex justify-center items-center mb-6">
+                 <img src="{{ url_for('static', filename='images/logo.png') }}" alt="AquaSync Logo" class="w-12 h-12 mr-3 rounded-2xl shadow-sm">
+                <h1 class="text-2xl font-bold text-blue-500">AquaSync</h1>
             </div>
-            <h1 class="text-2xl font-bold text-blue-500">AquaSync</h1>
         </div>
 
         <h2 class="text-center text-2xl font-bold text-gray-800 mb-1">Welcome Back</h2>
         <p class="text-center text-gray-500 text-sm mb-8">Sign in to access your AquaSync dashboard</p>
 
-        <div id="flash-message">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                <div class="mb-4 p-3 rounded-lg text-sm {{ 'bg-red-100 text-red-700' if category == 'error' else 'bg-green-100 text-green-700' }}">
-                    {{ message }}
-                </div>
-                {% endfor %}
-            {% endif %}
-            {% endwith %}
-        </div>
-
-        <div id="flash-message"></div>
-
+        {% include 'components/flash.html' ignore missing %}
 
         <form action="/" method="POST" id="loginForm">
             <div class="mb-4">
@@ -78,14 +63,13 @@
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
                             <i class="fa-solid fa-shield-halved"></i>
                         </span>
-                        
                         <input type="text" name="otp_code" id="otp_code" maxlength="6" autocomplete="off"
                             class="w-full bg-blue-50 text-gray-700 pl-10 pr-10 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition" 
                             placeholder="Enter OTP">
                     </div>
 
                     <button type="button" onclick="requestOtp()" id="btnGetCode"
-                        class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 px-4 rounded-lg transition whitespace-nowrap min-w-[100px]">
+                        class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 px-4 rounded-lg transition whitespace-nowrap min-w-[100px] disabled:opacity-50 disabled:cursor-not-allowed">
                         Get Code
                     </button>
                 </div>
@@ -102,7 +86,7 @@
     </div>
 
     <script>
-        // 1. Toggle Password Utama (Tetap Ada)
+        // Toggle Password
         function togglePassword() {
             const passwordInput = document.getElementById('password');
             const eyeIcon = document.getElementById('eyeIcon');
@@ -117,7 +101,44 @@
             }
         }
 
-        // 2. AJAX Request OTP
+        // Logic Countdown Timer
+        function startCooldown(duration) {
+            const btn = document.getElementById('btnGetCode');
+            let timer = duration;
+            const cooldownEndTime = Date.now() + (duration * 1000);
+            localStorage.setItem('otpCooldownEnd', cooldownEndTime);
+
+            btn.disabled = true;
+            btn.classList.remove("hover:bg-gray-300", "bg-gray-200", "text-gray-700");
+            btn.classList.add("bg-gray-300", "text-gray-500");
+
+            const interval = setInterval(() => {
+                const seconds = Math.ceil((cooldownEndTime - Date.now()) / 1000);
+                if (seconds <= 0) {
+                    clearInterval(interval);
+                    localStorage.removeItem('otpCooldownEnd');
+                    btn.innerText = "Get Code";
+                    btn.disabled = false;
+                    btn.classList.add("bg-gray-200", "text-gray-700", "hover:bg-gray-300");
+                    btn.classList.remove("bg-gray-300", "text-gray-500");
+                } else {
+                    btn.innerText = `Wait ${seconds}s`;
+                }
+            }, 1000);
+        }
+
+        window.onload = function() {
+            const cooldownEnd = localStorage.getItem('otpCooldownEnd');
+            if (cooldownEnd) {
+                const remaining = Math.ceil((cooldownEnd - Date.now()) / 1000);
+                if (remaining > 0) {
+                    startCooldown(remaining);
+                } else {
+                    localStorage.removeItem('otpCooldownEnd');
+                }
+            }
+        };
+
         async function requestOtp() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
@@ -143,12 +164,10 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    btn.innerText = "Sent!";
-                    btn.classList.remove("bg-gray-200", "text-gray-700");
-                    btn.classList.add("bg-green-100", "text-green-700");
                     flashDiv.innerHTML = `<div class="mb-4 p-3 rounded-lg text-sm bg-green-100 text-green-700">${data.message}</div>`;
+                    startCooldown(60); 
                 } else {
-                    btn.innerText = "Retry";
+                    btn.innerText = "Get Code";
                     btn.disabled = false;
                     flashDiv.innerHTML = `<div class="mb-4 p-3 rounded-lg text-sm bg-red-100 text-red-700">${data.message}</div>`;
                 }

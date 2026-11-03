@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}About - AquaSync{% endblock %}
+
+{% block content %}
+    <div class="max-w-5xl mx-auto">
+        
+        <div class="text-center mb-12 animate-[fadeIn_0.5s_ease-in-out]">
+            <div class="flex justify-center mb-4">
+                <a href="{{ url_for('dashboard') }}">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" 
+                        class="w-24 h-24 rounded-3xl shadow-lg transition-transform duration-300 hover:scale-110 hover:rotate-3 cursor-pointer"
+                        title="Kembali ke Dashboard" alt="AquaSync Logo">
+                </a>
+            </div>
+            <h1 class="text-4xl font-bold text-gray-800 mb-2 tracking-tight">Tentang AquaSync</h1>
+            <p class="text-blue-500 font-medium tracking-wide">Smart Aquarium Monitoring & Control System</p>
+        </div>
+
+        <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 mb-8 relative overflow-hidden group">
+            <div class="absolute -top-16 -right-16 w-32 h-32 bg-blue-100 rounded-full blur-3xl opacity-50 transition-transform duration-700 group-hover:scale-150"></div>
+            <div class="absolute -bottom-16 -left-16 w-32 h-32 bg-cyan-100 rounded-full blur-3xl opacity-50 transition-transform duration-700 group-hover:scale-150"></div>
+            
+            <div class="relative z-10">
+                <h2 class="text-2xl font-bold text-blue-600 mb-4 flex items-center"><i class="fa-solid fa-rocket mr-3"></i>Awal Mula</h2>
+                <p class="text-gray-600 leading-relaxed mb-4 text-justify">
+                    AquaSync didirikan pada tahun 2025 sebagai bagian dari proyek penelitian skripsi Program Studi Teknik Informatika. 
+                    Proyek ini lahir dari kebutuhan untuk memantau kondisi akuarium secara <i>real-time</i> dan presisi, 
+                    mengingat sensitivitas ekosistem air terhadap perubahan suhu dan konsistensi jadwal pemberian pakan.
+                </p>
+                <p class="text-gray-600 leading-relaxed text-justify">
+                    Dikembangkan dengan mengintegrasikan perangkat keras IoT <i>(Internet of Things)</i> berbasis mikrokontroler ESP32 dan perangkat lunak arsitektur <i>Full-Stack Web</i>. AquaSync tidak hanya menampilkan angka di layar, tetapi memberikan kendali penuh kepada penghobi akuarium untuk mengelola ekosistem akuarium mereka dari jarak jauh, kapan saja, dan di mana saja.
+                </p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-lg hover:-translate-y-2">
+                <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 mb-4">
+                    <i class="fa-solid fa-eye text-xl"></i>
+                </div>
+                <h3 class="font-bold text-gray-800 text-lg mb-2">Real-Time Monitoring</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Sistem secara aktif memantau metrik krusial seperti suhu air, sisa pakan, dan level air langsung ke <i>dashboard</i>.</p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-lg hover:-translate-y-2">
+                <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600 mb-4">
+                    <i class="fa-solid fa-robot text-xl"></i>
+                </div>
+                <h3 class="font-bold text-gray-800 text-lg mb-2">Otomatisasi Pakan</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Penjadwalan pakan multi-sesi yang dieksekusi dengan presisi menggunakan putaran motor servo terkalibrasi.</p>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-lg hover:-translate-y-2">
+                <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center text-yellow-500 mb-4">
+                    <i class="fa-solid fa-lightbulb text-xl"></i>
+                </div>
+                <h3 class="font-bold text-gray-800 text-lg mb-2">Smart Lighting</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Pengendalian siklus siang-malam buatan untuk ikan melalui lampu cerdas dengan opsi kontrol kustom maupun auto.</p>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-lg hover:-translate-y-2">
+                <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-purple-600 mb-4">
+                    <i class="fa-solid fa-gamepad text-xl"></i>
+                </div>
+                <h3 class="font-bold text-gray-800 text-lg mb-2">Kontrol Jarak Jauh</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Infrastruktur web <i>two-way communication</i> memungkinkan intervensi manual tanpa menyentuh perangkat keras.</p>
+            </div>
+
+        </div>
+
+        <div class="text-center text-gray-400 text-sm mt-12 mb-4 border-t border-gray-200 pt-8">
+            <p class="font-medium">Copyright &copy; 2026 AquaSync Project.</p>
+            <p class="mt-1">Engineered with <i class="fa-solid fa-heart text-red-500 animate-pulse mx-1"></i> by <b>Asep Aziz Miftahulhuda</b></p>
+        </div>
+
+    </div>
+{% endblock %}

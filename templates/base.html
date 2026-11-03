@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>{% block title %}AquaSync{% endblock %}</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+    
+    {% block head %}{% endblock %}
+</head>
+
+<body class="bg-gray-100 h-screen flex overflow-hidden">
+
+    <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden transition-opacity"></div>
+
+    {% include 'sidebar.html' ignore missing %}
+
+    <main class="flex-1 overflow-y-auto p-8 relative">
+        
+        {% include 'components/flash.html' ignore missing %}
+        
+        {% block content %}
+        {% endblock %}
+        
+    </main>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if(sidebar) sidebar.classList.toggle('-translate-x-full');
+            if(overlay) overlay.classList.toggle('hidden');
+        }
+    </script>
+
+    {% block scripts %}{% endblock %}
+
+</body>
+</html>

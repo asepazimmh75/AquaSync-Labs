@@ -1,0 +1,42 @@
+<aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-[#0F172A] text-white flex flex-col transform -translate-x-full md:translate-x-0 md:static md:flex transition-transform duration-300 ease-in-out shadow-2xl md:shadow-none">
+    
+    <div class="p-6 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="AquaSync Logo" class="w-12 h-12 object-contain">
+            <h1 class="text-2xl font-bold">AquaSync</h1>
+        </div>
+        <button onclick="toggleSidebar()" class="md:hidden text-gray-400 hover:text-white">
+            <i class="fa-solid fa-xmark text-2xl"></i>
+        </button>
+    </div>
+
+    <nav class="flex-1 px-4 space-y-2 mt-4 overflow-y-auto">
+        <a href="/dashboard" class="flex items-center gap-3 px-4 py-3 rounded-xl transition {{ 'bg-blue-600 text-white shadow-lg' if page == 'dashboard' else 'text-gray-400 hover:text-white hover:bg-white/5' }}">
+            <i class="fa-solid fa-border-all w-5 text-center"></i> Dashboard
+        </a>
+
+        <a href="/settings" class="flex items-center gap-3 px-4 py-3 rounded-xl transition {{ 'bg-blue-600 text-white shadow-lg' if page == 'settings' else 'text-gray-400 hover:text-white hover:bg-white/5' }}">
+            <i class="fa-solid fa-gear w-5 text-center"></i> Settings
+        </a>
+
+        <a href="/guide" class="flex items-center gap-3 px-4 py-3 rounded-xl transition {{ 'bg-blue-600 text-white shadow-lg' if page == 'guide' else 'text-gray-400 hover:text-white hover:bg-white/5' }}">
+            <i class="fa-solid fa-book-open w-5 text-center"></i> Guide
+        </a>
+
+        <div class="h-px bg-gray-700 my-2 mx-4 opacity-50"></div>
+
+        <a href="/about" class="flex items-center gap-3 px-4 py-3 rounded-xl transition {{ 'bg-blue-600 text-white shadow-lg' if page == 'about' else 'text-gray-400 hover:text-white hover:bg-white/5' }}">
+            <i class="fa-solid fa-circle-info w-5 text-center"></i> About
+        </a>
+
+        <a href="/contact" class="flex items-center gap-3 px-4 py-3 rounded-xl transition {{ 'bg-blue-600 text-white shadow-lg' if page == 'contact' else 'text-gray-400 hover:text-white hover:bg-white/5' }}">
+            <i class="fa-solid fa-headset w-5 text-center"></i> Contact
+        </a>
+    </nav>
+    
+    <div class="p-4 mt-auto">
+        <a href="/logout" class="flex items-center gap-3 text-gray-400 hover:text-red-400 px-4 py-3 transition">
+            <i class="fa-solid fa-right-from-bracket w-5 text-center"></i> Logout
+        </a>
+    </div>
+</aside>

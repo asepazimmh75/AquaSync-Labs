@@ -1,104 +1,183 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guide - AquaSync</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style> body { font-family: 'Poppins', sans-serif; } </style>
-</head>
-<body class="bg-gray-100 h-screen flex overflow-hidden">
+{% extends 'base.html' %}
 
-    <aside class="w-64 bg-[#0F172A] text-white flex flex-col hidden md:flex">
-        <div class="p-6 flex items-center gap-3">
-            <div class="bg-blue-500 p-1.5 rounded-lg"><i class="fa-solid fa-droplet text-white"></i></div>
-            <h1 class="text-xl font-bold">AquaSync</h1>
-        </div>
-        <nav class="flex-1 px-4 space-y-2 mt-4">
-            <a href="/dashboard" class="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-white/5 px-4 py-3 rounded-xl transition">
-                <i class="fa-solid fa-border-all"></i> Dashboard
-            </a>
-            <a href="/settings" class="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-white/5 px-4 py-3 rounded-xl transition">
-                <i class="fa-solid fa-gear"></i> Settings
-            </a>
-            <a href="/guide" class="flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-xl shadow-lg transition">
-                <i class="fa-solid fa-book-open"></i> Guide
-            </a>
-        </nav>
-        <div class="p-4">
-            <a href="/logout" class="flex items-center gap-3 text-gray-400 hover:text-red-400 px-4 py-3 transition"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
-        </div>
-    </aside>
+{% block title %}Guide - AquaSync{% endblock %}
 
-    <main class="flex-1 overflow-y-auto p-8">
-        <div class="mb-8">
+{% block content %}
+    <div class="flex justify-between items-start md:items-center mb-6 gap-6">
+        <div>
             <h1 class="text-3xl font-bold text-gray-800">User Guide 📖</h1>
-            <p class="text-gray-500">Panduan memahami parameter dan fitur AquaSync.</p>
+            <p class="text-gray-500 mt-1">Panduan interaktif fitur dan pengaturan AquaSync.</p>
         </div>
+         <button onclick="toggleSidebar()" class="md:hidden text-gray-600 bg-white p-2 rounded-lg shadow-sm border border-gray-100 hover:bg-gray-50 transition">
+            <i class="fa-solid fa-bars text-2xl"></i>
+        </button>
+    </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex gap-4">
-                <div class="bg-blue-100 text-blue-600 w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <i class="fa-solid fa-temperature-half text-xl"></i>
-                </div>
-                <div>
-                    <h3 class="font-bold text-gray-800 text-lg">Water Temperature</h3>
-                    <p class="text-gray-600 text-sm mt-1 leading-relaxed">
-                        Menampilkan suhu air akuarium secara <i>real-time</i> dalam satuan Celcius (°C). Pastikan suhu berada di rentang optimal (24°C - 28°C) untuk kesehatan ikan.
-                    </p>
-                </div>
-            </div>
+    <div class="flex flex-wrap gap-2 mb-6">
+        <button onclick="openTab('tab-dashboard', this)" class="tab-btn active grow sm:grow-0 px-4 py-2.5 rounded-full text-sm font-bold transition-all duration-300 bg-blue-600 text-white shadow-md text-center">
+            <i class="fa-solid fa-chart-pie mr-1"></i> Dashboard
+        </button>
+        <button onclick="openTab('tab-settings', this)" class="tab-btn grow sm:grow-0 px-4 py-2.5 rounded-full text-sm font-bold transition-all duration-300 bg-white text-gray-500 hover:bg-gray-100 border border-gray-200 text-center">
+            <i class="fa-solid fa-gear mr-1"></i> Settings
+        </button>
+        <button onclick="openTab('tab-support', this)" class="tab-btn grow sm:grow-0 px-4 py-2.5 rounded-full text-sm font-bold transition-all duration-300 bg-white text-gray-500 hover:bg-gray-100 border border-gray-200 text-center">
+            <i class="fa-solid fa-life-ring mr-1"></i> Support
+        </button>
+    </div>
 
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex gap-4">
-                <div class="bg-blue-100 text-blue-600 w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0">
+    <div id="tab-dashboard" class="tab-content block animate-[fadeIn_0.3s_ease-in-out]">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex gap-4 transition hover:shadow-md">
+                <div class="bg-blue-50 text-blue-500 w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0">
                     <i class="fa-solid fa-fish text-xl"></i>
                 </div>
                 <div>
-                    <h3 class="font-bold text-gray-800 text-lg">Amount of Feed</h3>
+                    <h3 class="font-bold text-gray-800 text-lg">Amount of Feed (Sisa Pakan)</h3>
                     <p class="text-gray-600 text-sm mt-1 leading-relaxed">
-                        Estimasi sisa pakan yang tersedia di wadah penyimpanan (Hopper). Satuan dalam gram. Sistem akan memberi peringatan jika pakan hampir habis.
+                        Menampilkan sisa pakan di wadah penyimpanan dalam satuan <b>Persentase (0-100%)</b>. 
+                        Terdapat tombol <b>Beri Pakan Sekarang</b> (Ikon <i class="fa-solid fa-cookie-bite text-orange-500"></i>) untuk mengeluarkan pakan secara manual dari jarak jauh.
                     </p>
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex gap-4">
-                <div class="bg-blue-100 text-blue-600 w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex gap-4 transition hover:shadow-md">
+                <div class="bg-blue-50 text-blue-500 w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i class="fa-solid fa-temperature-half text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-800 text-lg">Water Temp & Light</h3>
+                    <p class="text-gray-600 text-sm mt-1 leading-relaxed">
+                        Suhu air akuarium secara <i>real-time</i> (°C). Terdapat juga <b>Tombol Lampu Pintar</b> untuk menyalakan/mematikan lampu secara instan. Ikon akan menyala kuning terang jika lampu sedang aktif.
+                    </p>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex gap-4 transition hover:shadow-md">
+                <div class="bg-blue-50 text-blue-500 w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0">
                     <i class="fa-solid fa-droplet text-xl"></i>
                 </div>
                 <div>
                     <h3 class="font-bold text-gray-800 text-lg">Water Level</h3>
                     <p class="text-gray-600 text-sm mt-1 leading-relaxed">
-                        Indikator ketinggian air dalam akuarium. 100% berarti penuh. Berguna untuk mendeteksi kebocoran atau penguapan air yang berlebihan.
+                        Indikator ketinggian air dalam akuarium (0-100%). Berguna untuk mendeteksi penguapan yang berlebihan atau indikasi kebocoran pada kaca akuarium tanpa harus melihat langsung.
                     </p>
                 </div>
             </div>
 
-             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex gap-4">
-                <div class="bg-blue-100 text-blue-600 w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <i class="fa-solid fa-heart-pulse text-xl"></i>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex gap-4 transition hover:shadow-md">
+                <div class="bg-blue-50 text-blue-500 w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i class="fa-solid fa-wifi text-xl"></i>
                 </div>
                 <div>
-                    <h3 class="font-bold text-gray-800 text-lg">System Health</h3>
+                    <h3 class="font-bold text-gray-800 text-lg">Device Status & Health</h3>
                     <p class="text-gray-600 text-sm mt-1 leading-relaxed">
-                        Skor kesehatan keseluruhan sistem IoT. Dihitung berdasarkan konektivitas sensor (ESP32) dan kestabilan data yang dikirimkan.
+                        Memantau apakah ESP32 sedang <b>Online</b> atau <b>Offline</b>. Menampilkan kekuatan sinyal Wi-Fi alat (dBm) dan skor kesehatan sistem berdasarkan stabilitas sensor.
                     </p>
                 </div>
             </div>
-
         </div>
-        
-        <div class="mt-8 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-2xl p-6 text-white shadow-lg">
-            <h3 class="font-bold text-xl mb-2"><i class="fa-regular fa-lightbulb mr-2"></i>Tips Perawatan</h3>
-            <ul class="list-disc list-inside space-y-1 text-sm opacity-90">
-                <li>Bersihkan sensor suhu setiap 2 minggu sekali agar pembacaan akurat.</li>
-                <li>Pastikan pakan yang digunakan berbentuk pelet kering agar tidak menyumbat motor servo.</li>
-                <li>Cek koneksi Wi-Fi ESP32 jika status Device berubah menjadi "Offline".</li>
+    </div>
+
+    <div id="tab-settings" class="tab-content hidden animate-[fadeIn_0.3s_ease-in-out]">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <div class="flex items-start gap-4">
+                    <div class="mt-1 bg-green-50 text-green-500 w-10 h-10 rounded-lg flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-clock text-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-lg text-gray-800">Jadwal Pakan Otomatis</h4>
+                        <p class="text-sm text-gray-600 mt-2 leading-relaxed">Tambahkan jam spesifik agar alat otomatis memberikan pakan. Anda dapat menambahkan banyak jadwal sekaligus, serta mengedit (ikon pensil) atau menghapusnya kapan saja.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <div class="flex items-start gap-4">
+                    <div class="mt-1 bg-yellow-50 text-yellow-500 w-10 h-10 rounded-lg flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-lightbulb text-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-lg text-gray-800">Otomatisasi Pencahayaan</h4>
+                        <p class="text-sm text-gray-600 mt-2 leading-relaxed">Atur cara kerja lampu: <b>Manual</b> (Hanya lewat Dashboard), <b>Otomatis Malam</b> (Nyala 18:00 - Mati 06:00), atau <b>Kustom</b> (Atur jam nyala dan mati sesuai keinginan Anda).</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 md:col-span-2">
+                <div class="flex items-start gap-4">
+                    <div class="mt-1 bg-red-50 text-red-500 w-10 h-10 rounded-lg flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-power-off text-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-lg text-gray-800">Kontrol Alat Utama (Master Switch)</h4>
+                        <p class="text-sm text-gray-600 mt-2 leading-relaxed">Fitur <i>Emergency Stop</i>. Matikan saklar ini jika Anda sedang membersihkan akuarium (menguras air/filter). Jika dimatikan, semua jadwal otomatis (pakan & lampu) akan ditunda sementara hingga saklar dinyalakan kembali.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-support" class="tab-content hidden animate-[fadeIn_0.3s_ease-in-out]">
+        <div class="mb-8 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-2xl p-6 text-white shadow-lg">
+            <h3 class="font-bold text-xl mb-2"><i class="fa-regular fa-lightbulb mr-2"></i>Tips Perawatan Perangkat Keras</h3>
+            <ul class="list-disc list-inside space-y-2 text-sm opacity-90 mt-3">
+                <li>Bersihkan ujung logam sensor suhu (DS18B20) dari lumut setiap 2 minggu sekali agar pembacaan tetap akurat.</li>
+                <li>Pastikan pakan yang dimasukkan ke Hopper bertekstur kering dan tidak lengket agar tidak menyumbat putaran Motor Servo.</li>
+                <li>Posisikan alat sensor ultrasonik jarak air terhindar dari cipratan gelembung aerator yang terlalu kencang.</li>
+                <li>Cek sumber listrik dan koneksi jaringan Wi-Fi yang terhubung ke alat jika status perangkat di Dashboard berubah menjadi "Offline".</li>
             </ul>
         </div>
 
-    </main>
-</body>
-</html>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-full">
+                <div class="flex items-start gap-4">
+                    <div class="mt-1 bg-purple-50 text-purple-500 w-10 h-10 rounded-lg flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-paper-plane text-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-lg text-gray-800">Pengiriman Pesan Cepat</h4>
+                        <p class="text-sm text-gray-600 mt-2 leading-relaxed">Melalui halaman Contact, kirim kendala teknis atau saran langsung ke email pengembang. Pesan Anda akan diterima secara <i>real-time</i> oleh tim AquaSync.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-full">
+                <div class="flex items-start gap-4">
+                    <div class="mt-1 bg-gray-50 text-gray-500 w-10 h-10 rounded-lg flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-shield-halved text-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-lg text-gray-800">Batas Pengiriman (Anti-Spam)</h4>
+                        <p class="text-sm text-gray-600 mt-2 leading-relaxed">Demi keamanan server, pengiriman pesan dibatasi maksimal <b>3 pesan per hari</b> dengan jeda waktu tunggu (cooldown) 3 menit untuk setiap pengiriman pesan.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function openTab(tabId, element) {
+        const contents = document.querySelectorAll('.tab-content');
+        contents.forEach(content => {
+            content.classList.add('hidden');
+            content.classList.remove('block');
+        });
+
+        const selectedTab = document.getElementById(tabId);
+        selectedTab.classList.remove('hidden');
+        selectedTab.classList.add('block');
+
+        // Reset class tombol pas responsive
+        const buttons = document.querySelectorAll('.tab-btn');
+        buttons.forEach(btn => {
+            btn.className = "tab-btn grow sm:grow-0 px-4 py-2.5 rounded-full text-sm font-bold transition-all duration-300 bg-white text-gray-500 hover:bg-gray-100 border border-gray-200 text-center";
+        });
+
+        // Tombol aktif
+        element.className = "tab-btn active grow sm:grow-0 px-4 py-2.5 rounded-full text-sm font-bold transition-all duration-300 bg-blue-600 text-white shadow-md text-center";
+    }
+</script>
+{% endblock %}

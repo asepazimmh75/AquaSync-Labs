@@ -1,202 +1,354 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - AquaSync</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - AquaSync{% endblock %}
+
+{% block head %}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: 'Poppins', sans-serif; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
     </style>
-</head>
-<body class="bg-gray-100 h-screen flex overflow-hidden">
+{% endblock %}
 
-    <aside class="w-64 bg-[#0F172A] text-white flex flex-col hidden md:flex">
-        <div class="p-6 flex items-center gap-3">
-            <div class="bg-blue-500 p-1.5 rounded-lg">
-                <i class="fa-solid fa-droplet text-white"></i>
-            </div>
-            <h1 class="text-xl font-bold">AquaSync</h1>
-        </div>
-
-        <nav class="flex-1 px-4 space-y-2 mt-4">
-            <a href="/dashboard" class="flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-xl shadow-lg shadow-blue-900/50 transition">
-                <i class="fa-solid fa-border-all"></i> Dashboard
-            </a>
-            <a href="/settings" class="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-white/5 px-4 py-3 rounded-xl transition">
-                <i class="fa-solid fa-gear"></i> Settings
-            </a>
-            <a href="/guide" class="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-white/5 px-4 py-3 rounded-xl transition">
-                <i class="fa-solid fa-book-open"></i> Guide
-            </a>
-        </nav>
-
-        <div class="p-4">
-            <a href="/logout" class="flex items-center gap-3 text-gray-400 hover:text-red-400 px-4 py-3 transition">
-                <i class="fa-solid fa-right-from-bracket"></i> Logout
-            </a>
-        </div>
-    </aside>
-
-    <main class="flex-1 overflow-y-auto p-8">
-        
-        <div class="flex justify-between items-center mb-8">
+{% block content %}
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-6">
+        <div class="flex justify-between w-full md:w-auto items-start">
             <div>
                 <h1 class="text-3xl font-bold text-gray-800">Welcome back, {{ user.username }}! 👋</h1>
                 <p class="text-gray-500 mt-1">Here's what's happening with your aquarium today.</p>
             </div>
-            <button class="md:hidden text-gray-600"><i class="fa-solid fa-bars text-2xl"></i></button>
+            <button onclick="toggleSidebar()" class="md:hidden text-gray-600 bg-white p-2 rounded-lg shadow-sm border border-gray-100 ml-4 hover:bg-gray-50 transition">
+                <i class="fa-solid fa-bars text-2xl"></i>
+            </button>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-gray-500 text-sm">Water Temperature</p>
-                        <h2 class="text-3xl font-bold text-gray-800 mt-2">{{ data.temp }} <span class="text-lg text-gray-400">°C</span></h2>
-                        <p class="text-xs text-gray-400 mt-2">Optimal range</p>
-                    </div>
-                    <div class="bg-blue-50 p-3 rounded-xl text-blue-500">
-                        <i class="fa-solid fa-temperature-half text-xl"></i>
-                    </div>
+        <div onclick="changeChart('health')" class="w-full md:w-auto px-4 py-3 bg-white rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between gap-6 cursor-pointer group transition hover:shadow-md">
+            <div>
+                <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider">System Health</p>
+                <div class="flex items-baseline gap-1 mt-0.5">
+                    <h2 class="text-2xl font-bold text-gray-800 leading-none"><span id="val-health">{{ data.system_health }}</span></h2>
+                    <span class="text-sm text-gray-400 font-medium">%</span>
                 </div>
-                <div class="absolute top-4 right-4 w-2 h-2 bg-green-400 rounded-full"></div>
+                
+                {% if data.system_health >= 90 %}
+                    <p class="text-[10px] text-green-500 font-medium mt-1">↑ All systems normal</p>
+                {% elif data.system_health >= 70 %}
+                    <p class="text-[10px] text-yellow-500 font-medium mt-1">⚠ Koneksi / Sinyal lemah</p>
+                {% elif data.system_health > 0 %}
+                    <p class="text-[10px] text-orange-500 font-medium mt-1">⚠ Periksa sensor & jaringan!</p>
+                {% else %}
+                    <p class="text-[10px] text-red-500 font-medium mt-1">↓ Sistem Offline</p>
+                {% endif %}
+                
             </div>
+            <div class="bg-blue-50 w-11 h-11 rounded-xl flex items-center justify-center text-blue-500 shrink-0 transition-colors duration-300 group-hover:bg-blue-500 group-hover:text-white">
+                <i class="fa-solid fa-heart-pulse text-lg"></i>
+            </div>
+        </div>
+    </div>
 
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-gray-500 text-sm">Amount of Feed</p>
-                        <h2 class="text-3xl font-bold text-gray-800 mt-2">{{ data.feed }} <span class="text-lg text-gray-400">g</span></h2>
-                        <p class="text-xs text-red-500 mt-2 font-medium">↓ {{ data.feed_trend }}g from yesterday</p>
-                    </div>
-                    <div class="bg-blue-50 p-3 rounded-xl text-blue-500">
+    <div id="smartAlertsContainer" class="mb-6 space-y-3 empty:hidden"></div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative transition-all duration-300 hover:shadow-md hover:-translate-y-1 group">
+            <div class="flex justify-between items-start">
+                <div onclick="changeChart('feed')" class="cursor-pointer">
+                    <p class="text-gray-500 text-sm font-medium">Amount of Feed</p>
+                    <h2 class="text-3xl font-bold text-gray-800 mt-2"><span id="val-feed">{{ data.feed }}</span> <span class="text-lg text-gray-400">%</span></h2>
+                    <p class="text-xs text-red-500 mt-2 font-medium">↓ -12% from yesterday</p>
+                </div>
+                <div class="flex gap-2 relative z-10">
+                    <button id="btn-pakan" onclick="beriPakanManual()" class="bg-gray-50 p-3 rounded-xl text-gray-400 transition-all duration-300 hover:bg-orange-50 hover:text-orange-500 border border-gray-100 shadow-sm" title="Beri Pakan Sekarang">
+                        <i id="icon-pakan" class="fa-solid fa-cookie-bite text-xl transition-all duration-300"></i>
+                    </button>
+                    <button onclick="changeChart('feed')" class="bg-blue-50 p-3 rounded-xl text-blue-500 transition-colors duration-300 hover:bg-blue-500 hover:text-white cursor-pointer" title="Lihat Grafik">
                         <i class="fa-solid fa-fish text-xl"></i>
-                    </div>
+                    </button>
                 </div>
-            </div>
-
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-gray-500 text-sm">Water Level</p>
-                        <h2 class="text-3xl font-bold text-gray-800 mt-2">{{ data.water_level }} <span class="text-lg text-gray-400">%</span></h2>
-                        <p class="text-xs text-green-500 mt-2 font-medium">↑ +5% from yesterday</p>
-                    </div>
-                    <div class="bg-blue-50 p-3 rounded-xl text-blue-500">
-                        <i class="fa-solid fa-droplet text-xl"></i>
-                    </div>
-                </div>
-                <div class="absolute top-4 right-4 w-2 h-2 bg-green-400 rounded-full"></div>
-            </div>
-
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-gray-500 text-sm">System Health</p>
-                        <h2 class="text-3xl font-bold text-gray-800 mt-2">{{ data.system_health }} <span class="text-lg text-gray-400">%</span></h2>
-                        <p class="text-xs text-green-500 mt-2 font-medium">↑ All systems normal</p>
-                    </div>
-                    <div class="bg-blue-50 p-3 rounded-xl text-blue-500">
-                        <i class="fa-solid fa-heart-pulse text-xl"></i>
-                    </div>
-                </div>
-                <div class="absolute top-4 right-4 w-2 h-2 bg-green-400 rounded-full"></div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                <h3 class="font-bold text-gray-800">Feeding Trends</h3>
-                <p class="text-sm text-gray-500 mb-4">Feed dispensed over the last 24 hours</p>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative transition-all duration-300 hover:shadow-md hover:-translate-y-1 group">
+            <div class="flex justify-between items-start">
+                <div onclick="changeChart('temp')" class="cursor-pointer">
+                    <p class="text-gray-500 text-sm font-medium">Water Temp & Light</p>
+                    <h2 class="text-3xl font-bold text-gray-800 mt-2"><span id="val-temp">{{ data.temp }}</span> <span class="text-lg text-gray-400">°C</span></h2>
+                    <p class="text-xs text-gray-400 mt-2">Click to view trend</p>
+                </div>
+                <div class="flex gap-2 relative z-10">
+                    <button onclick="toggleSmartLampu()" class="bg-gray-50 p-3 rounded-xl transition-all duration-300 hover:bg-gray-200 border border-gray-100 shadow-sm" title="Kontrol Lampu">
+                        <i id="icon-lampu" class="fa-solid fa-lightbulb text-xl transition-all duration-300" 
+                           {% if data.status_lampu == 'NYALA' %}
+                           style="color: #facc15; filter: drop-shadow(0 0 8px rgba(250,204,21,0.6));"
+                           {% else %}
+                           style="color: #9ca3af;"
+                           {% endif %}>
+                        </i>
+                    </button>
+                    <button onclick="changeChart('temp')" class="bg-blue-50 p-3 rounded-xl text-blue-500 transition-colors duration-300 hover:bg-blue-500 hover:text-white cursor-pointer" title="Lihat Grafik Suhu">
+                        <i class="fa-solid fa-temperature-half text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="absolute top-4 right-4 w-2 h-2 {{ 'bg-green-400' if data.temp < 30 else 'bg-red-500 animate-pulse' }} rounded-full"></div>
+        </div>
+
+        <div onclick="changeChart('water')" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative transition-all duration-300 hover:shadow-md hover:-translate-y-1 cursor-pointer group">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-gray-500 text-sm font-medium">Water Level</p>
+                    <h2 class="text-3xl font-bold text-gray-800 mt-2"><span id="val-water">{{ data.water_level }}</span> <span class="text-lg text-gray-400">%</span></h2>
+                    <p class="text-xs text-green-500 mt-2 font-medium">↑ +5% from yesterday</p>
+                </div>
+                <div class="bg-blue-50 p-3 rounded-xl text-blue-500 transition-colors duration-300 group-hover:bg-blue-500 group-hover:text-white">
+                    <i class="fa-solid fa-droplet text-xl"></i>
+                </div>
+            </div>
+            <div class="absolute top-4 right-4 w-2 h-2 {{ 'bg-green-400' if data.water_level > 50 else 'bg-red-500 animate-pulse' }} rounded-full"></div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h3 id="chartTitle" class="font-bold text-gray-800">Feeding Trends</h3>
+                        <p id="chartDesc" class="text-sm text-gray-500">Feed dispensed over the last 24 hours</p>
+                    </div>
+                </div>
                 <div class="h-64">
-                    <canvas id="feedingChart"></canvas>
+                    <canvas id="mainChart"></canvas>
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-fit">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="font-bold text-gray-800">Device Status</h3>
+            <div class="bg-blue-50 p-5 rounded-2xl border border-blue-100 flex gap-4 items-start">
+                <div class="text-blue-500 mt-1"><i class="fa-solid fa-lightbulb text-xl"></i></div>
+                <div>
+                    <h4 class="font-bold text-gray-800 mb-1">Insight & Tips</h4>
+                    <p id="chartTips" class="text-sm text-gray-600 leading-relaxed">
+                        Pilih salah satu kartu di atas untuk melihat insight dan tips perawatan akuarium Anda.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-fit">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-bold text-gray-800">Device Status</h3>
+                {% if data.is_online %}
                     <span class="bg-green-100 text-green-600 text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
                         <i class="fa-solid fa-wifi"></i> Online
                     </span>
-                </div>
+                {% else %}
+                    <span class="bg-red-100 text-red-600 text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
+                        <i class="fa-solid fa-wifi-slash"></i> Offline
+                    </span>
+                {% endif %}
+            </div>
 
-                <div class="flex items-center gap-4 mb-6">
-                    <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                    {% if data.is_online %}
                         <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-gray-800">AquaSync-001</h4>
-                        <p class="text-sm text-gray-500">ESP32 Controller</p>
-                    </div>
+                    {% else %}
+                        <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                    {% endif %}
                 </div>
-
-                <div class="flex items-center gap-2 text-sm text-gray-500 mb-6 border-b pb-6">
-                    <i class="fa-regular fa-clock"></i> Last seen: Just now
-                </div>
-
-                <div class="flex justify-between">
-                    <div>
-                        <p class="text-xs text-gray-500">Firmware</p>
-                        <p class="font-bold text-gray-800">v1.2.0</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-xs text-gray-500">Signal</p>
-                        <p class="font-bold text-gray-800">-42 dBm</p>
-                    </div>
+                <div>
+                    <h4 class="font-bold text-gray-800">AquaSync-001</h4>
+                    <p class="text-sm text-gray-500">ESP32 Controller</p>
                 </div>
             </div>
 
+            <div class="flex items-center gap-2 text-sm text-gray-500 mb-6 border-b pb-6">
+                <i class="fa-regular fa-clock"></i> Last ping: 
+                <span class="{{ 'text-green-500 font-medium' if data.is_online else 'text-red-500 font-medium' }}">
+                    {{ "Just now" if data.is_online else "> 5 mins ago" }}
+                </span>
+            </div>
+
+            <div class="flex justify-between">
+                <div>
+                    <p class="text-xs text-gray-500">Firmware</p>
+                    <p class="font-bold text-gray-800">v1.2.0</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs text-gray-500">Signal</p>
+                    <p class="text-xl font-bold"><span id="val-signal">{{ data.signal }}</span> dBm</p>
+                </div>
+            </div>
         </div>
+    </div>
+{% endblock %}
 
-    </main>
-
+{% block scripts %}
     <script>
-        const ctx = document.getElementById('feedingChart').getContext('2d');
-        
-        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-        gradient.addColorStop(0, 'rgba(59, 130, 246, 0.5)'); 
-        gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+        window.aquaSyncData = {
+            temp: parseFloat("{{ data.temp }}"),
+            water: parseInt("{{ data.water_level }}"),
+            isOnline: "{{ data.is_online }}" === "True",
+            statusLampu: "{{ data.status_lampu|default('MATI') }}", 
+            lampMode: "manual" 
+        };
 
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
-                datasets: [{
-                    label: 'Feed (g)',
-                    data: [1.8, 0.2, 2.5, 2.7, 3.6, 1.8, 0.5], 
-                    borderColor: '#3B82F6', 
-                    backgroundColor: gradient,
-                    borderWidth: 2,
-                    tension: 0.4, 
-                    fill: true,
-                    pointRadius: 0, 
-                    pointHoverRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false } 
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { borderDash: [5, 5] }, 
-                    },
-                    x: {
-                        grid: { display: false } 
-                    }
-                }
+        function beriPakanManual() {
+            // --- SATPAM CEK ONLINE ---
+            if (!window.aquaSyncData.isOnline) {
+                alert("⚠️ Perintah ditolak! AquaSync sedang Offline. Pastikan alat terhubung ke listrik dan Wi-Fi.");
+                return; 
             }
-        });
+
+            if(confirm("Apakah Anda yakin ingin memberi pakan sekarang?")) {
+                
+                let btnPakan = document.getElementById('btn-pakan');
+                let iconPakan = document.getElementById('icon-pakan');
+                btnPakan.classList.replace('bg-gray-50', 'bg-orange-50');
+                btnPakan.classList.replace('text-gray-400', 'text-orange-500');
+                iconPakan.classList.add('fa-bounce');
+
+                fetch('/api/kontrol-pakan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ aksi: "BERI_PAKAN" })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status === "sukses") {
+                        alert("Berhasil! Servo sedang berputar...");
+                    } else {
+                        alert("Gagal mengirim perintah.");
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    alert("Alat sedang offline atau terjadi masalah jaringan.");
+                })
+                .finally(() => {
+                    setTimeout(() => {
+                        btnPakan.classList.replace('bg-orange-50', 'bg-gray-50');
+                        btnPakan.classList.replace('text-orange-500', 'text-gray-400');
+                        iconPakan.classList.remove('fa-bounce');
+                    }, 3000);
+                });
+            }
+        }
+
+        // ==============================================
+        // FUNGSI BARU: SMART TOGGLE LAMPU DENGAN SATPAM
+        // ==============================================
+        function toggleSmartLampu() {
+            // --- SATPAM CEK ONLINE ---
+            if (!window.aquaSyncData.isOnline) {
+                alert("⚠️ Perintah ditolak! AquaSync sedang Offline. Pastikan alat terhubung ke listrik dan Wi-Fi.");
+                return; 
+            }
+
+            if (window.aquaSyncData.lampMode !== "manual") {
+                alert("⚠️ Gagal! Mode Otomatis sedang aktif.\n\nSilakan ubah ke 'Manual' di menu Settings jika ingin menggunakan tombol ini.");
+                return;
+            }
+
+            let aksiKirim = window.aquaSyncData.statusLampu === "NYALA" ? "MATIKAN_LAMPU" : "NYALAKAN_LAMPU";
+            let pesanTanya = aksiKirim === "NYALAKAN_LAMPU" ? "Nyalakan lampu akuarium?" : "Matikan lampu akuarium?";
+
+            if(confirm(pesanTanya)) {
+                fetch('/api/kontrol-lampu', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ aksi: aksiKirim })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status === "sukses") {
+                        console.log("Perintah " + aksiKirim + " terkirim!");
+                    } else {
+                        alert("Gagal mengirim perintah lampu.");
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        }
+
+        // ==============================================
+        // UPDATE AUTO REFRESH TIAP 3 DETIK
+        // ==============================================
+        function autoRefresh() {
+            fetch('/api/get-latest-data')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('val-temp').innerText = data.temp;
+                    document.getElementById('val-feed').innerText = data.feed;
+                    document.getElementById('val-water').innerText = data.water_level;
+                    document.getElementById('val-health').innerText = data.system_health;
+                    
+                    let signalEl = document.getElementById('val-signal');
+                    if(signalEl) signalEl.innerText = data.signal;
+                    
+                    window.aquaSyncData.lampMode = data.lamp_mode; 
+                    window.aquaSyncData.statusLampu = data.status_lampu;
+                    
+                    // Update Ikon Lampu Gaya Meme
+                    let iconLampu = document.getElementById('icon-lampu');
+                    if(iconLampu) {
+                        if (data.status_lampu === "NYALA") {
+                            iconLampu.style.color = "#facc15"; 
+                            iconLampu.style.filter = "drop-shadow(0 0 8px rgba(250,204,21,0.6))"; 
+                        } else {
+                            iconLampu.style.color = "#9ca3af"; 
+                            iconLampu.style.filter = "none";
+                        }
+                    }
+
+                    // --- EFEK JOGET OTOMATIS SAAT JADWAL PAKAN JALAN ---
+                    if (data.is_feeding) {
+                        let btnPakan = document.getElementById('btn-pakan');
+                        let iconPakan = document.getElementById('icon-pakan');
+                        
+                        if (!iconPakan.classList.contains('fa-bounce')) {
+                            btnPakan.classList.replace('bg-gray-50', 'bg-orange-50');
+                            btnPakan.classList.replace('text-gray-400', 'text-orange-500');
+                            iconPakan.classList.add('fa-bounce');
+
+                            setTimeout(() => {
+                                btnPakan.classList.replace('bg-orange-50', 'bg-gray-50');
+                                btnPakan.classList.replace('text-orange-500', 'text-gray-400');
+                                iconPakan.classList.remove('fa-bounce');
+                            }, 3000);
+                        }
+                    }
+                    
+                    window.aquaSyncData.temp = data.temp;
+                    window.aquaSyncData.water = data.water_level;
+                    window.aquaSyncData.isOnline = data.is_online;
+
+                    // --- MUNCULIN NOTIF ANOMALI PAKAN (SKENARIO B) ---
+                    if (data.anomali) {
+                        // Bikin alert khusus warna ijo atau oren
+                        const colors = data.anomali.tipe === 'warning' ? 'bg-orange-50 border-orange-200 text-orange-700' : 'bg-green-50 border-green-200 text-green-700';
+                        const icon = data.anomali.tipe === 'warning' ? 'fa-user-secret' : 'fa-check-circle';
+                        
+                        const alertHTML = `
+                            <div class="p-4 rounded-xl border flex items-start gap-3 ${colors} shadow-sm animate-fade-in mb-3">
+                                <div class="mt-0.5"><i class="fa-solid ${icon} text-lg fa-bounce"></i></div>
+                                <div>
+                                    <h4 class="font-bold">Info Sensor Ultrasonik</h4>
+                                    <p class="text-sm mt-1 opacity-90">${data.anomali.teks}</p>
+                                </div>
+                            </div>
+                        `;
+                        document.getElementById('smartAlertsContainer').insertAdjacentHTML('afterbegin', alertHTML);
+                    }
+                    
+                    if (typeof window.checkAlertsGlobal === "function") {
+                        window.checkAlertsGlobal();
+                    }
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+
+        setInterval(autoRefresh, 3000);
     </script>
-</body>
-</html>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
